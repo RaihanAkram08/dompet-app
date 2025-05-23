@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Register</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #c1d7e3;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #334e68;
+      flex-direction: column;
+    }
+
+    form {
+      background: #d9e6f2;
+      padding: 3rem 3rem 4rem;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+      width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    label {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    input {
+      padding: 1rem 1.4rem;
+      font-size: 1.3rem;
+      border-radius: 14px;
+      border: 2.5px solid #aac7d6;
+      background: #f1f6fb;
+      color: #1e2a38;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+      outline-offset: 3px;
+    }
+
+    input::placeholder {
+      color: #7a8b9e;
+    }
+
+    input:focus {
+      border-color: #406882;
+      background-color: #d0e2f3;
+      outline: none;
+      box-shadow: 0 0 8px #406882aa;
+    }
+
+    button {
+      background: linear-gradient(90deg, #406882, #2f5972);
+      border: none;
+      border-radius: 24px;
+      padding: 1.3rem 0;
+      font-weight: 600;
+      font-size: 1.4rem;
+      color: #f0f5f9;
+      cursor: pointer;
+      box-shadow: 0 8px 20px #33576b99;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #2f5972, #1f4254);
+    }
+
+    p {
+      margin-top: 1.6rem;
+      font-size: 1rem;
+      color: #334e68;
+    }
+
+    p a {
+      color: #406882;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    p a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 460px) {
+      form {
+        width: 100%;
+        padding: 2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <form id="register-form">
+    <label for="name">Name</label>
+    <input type="text" id="name" placeholder="Name" required />
+    
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Username" required />
+
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Password" required />
+
+    <button type="submit">Register</button>
+  </form>
+
+  <p>Sudah punya akun? <a href="login.html">Login di sini</a></p>
+
+  <script>
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, name })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert('Register success, silakan login.');
+        location.href = '/login.html';
+      } else {
+        alert(data.error);
+      }
+    });
+  </script>
+</body>
+
+</html>

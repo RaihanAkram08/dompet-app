@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1747964995606,
+      "tag": "0000_chief_valeria_richards",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1747965770063,
+      "tag": "0001_common_lila_cheney",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1747967128804,
+      "tag": "0002_lean_trauma",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1747969523803,
+      "tag": "0003_neat_hammerhead",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1747972374130,
+      "tag": "0004_brave_gamma_corps",
+      "breakpoints": true
+    }
+  ]
+}

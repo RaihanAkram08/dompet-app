@@ -1,0 +1,1 @@
+ALTER TABLE "transactions_sample" ADD COLUMN "date" date DEFAULT now() NOT NULL;
