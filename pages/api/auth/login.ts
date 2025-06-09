@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const token = jwt.sign({ userId: user[0].id, username: user[0].username }, JWT_SECRET, { expiresIn: '1d' });
 
-  // Set HttpOnly cookie
+  // Set HttpOnly cookie  
   res.setHeader('Set-Cookie', serialize('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
