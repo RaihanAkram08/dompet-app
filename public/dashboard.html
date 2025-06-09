@@ -287,7 +287,7 @@
     }
     const data = await res.json();
     currentUserId = data.user.userId;
-    document.getElementById('welcome-heading').textContent = `Selamat Datang, ${data.user.name}`;
+    document.getElementById('welcome-heading').textContent = `Selamat Datang`;
   }
 
   async function fetchTransactions() {
