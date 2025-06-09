@@ -1,3 +1,4 @@
+// /api/auth/login.ts
 import { db } from '@/src/db';
 import { users } from '@/src/db/schema';
 import { loginSchema } from '@/utils/zodSchemas';
@@ -10,16 +11,16 @@ import { serialize } from 'cookie';
 const JWT_SECRET = process.env.JWT_SECRET || 'rahasia';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'POST') return res.status(405).end();
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
+    return res.status(405).end('Method Not Allowed');
+  }
 
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: 'Invalid data' });
 
   const { username, password } = parsed.data;
-  const user = await db.select({ id: users.id, username: users.username, name: users.name, password: users.password })
-  .from(users)
-  .where(eq(users.username, username));
-
+  const user = await db.select().from(users).where(eq(users.username, username));
   if (!user.length) return res.status(401).json({ error: 'Invalid credentials' });
 
   const valid = await bcrypt.compare(password, user[0].password);
@@ -27,15 +28,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const token = jwt.sign({ userId: user[0].id, username: user[0].username }, JWT_SECRET, { expiresIn: '1d' });
 
-  // Set cookie HttpOnly
+  // Set HttpOnly cookie
   res.setHeader('Set-Cookie', serialize('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 60 * 60 * 24, // 1 hari
+    maxAge: 60 * 60 * 24,
     path: '/',
   }));
 
-  // Kirim juga 'name' supaya bisa tampil di dashboard
-  res.status(200).json({ message: 'Login successful', userId: user[0].id, name: user[0].name });
+  return res.status(200).json({ message: 'Login successful', userId: user[0].id, name: user[0].name });
 }

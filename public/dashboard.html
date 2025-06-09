@@ -256,116 +256,129 @@
   <button class="logout" id="logout-btn">Logout</button>
 
   <script>
-    // Set default tanggal hari ini pada input date saat halaman dimuat
-    const dateInput = document.getElementById('date');
-    function setTodayDate() {
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-      dateInput.value = `${yyyy}-${mm}-${dd}`;
-    }
+  const dateInput = document.getElementById('date');
+  const form = document.getElementById('transaction-form');
+  const txIdInput = document.getElementById('tx-id');
+  const titleInput = document.getElementById('title');
+  const amountInput = document.getElementById('amount');
+  const cancelEditBtn = document.getElementById('cancel-edit');
+  const txList = document.getElementById('transaction-list');
+  const logoutBtn = document.getElementById('logout-btn');
 
-    setTodayDate();
+  let currentUserId = null;
+  let transactions = [];
 
-    // Contoh script sederhana untuk tambah / edit / hapus data transaksi
-    const form = document.getElementById('transaction-form');
-    const txIdInput = document.getElementById('tx-id');
-    const titleInput = document.getElementById('title');
-    const amountInput = document.getElementById('amount');
-    const cancelEditBtn = document.getElementById('cancel-edit');
-    const txList = document.getElementById('transaction-list');
-    const logoutBtn = document.getElementById('logout-btn');
-
-    let transactions = [];
-    let editId = null;
-
-    async function checkAuth() {
-  const res = await fetch('/api/auth/me');
-  if (!res.ok) {
-    location.href = '/login.html';
-    return;
+  function setTodayDate() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.value = `${yyyy}-${mm}-${dd}`;
   }
-  const data = await res.json();
-  currentUserId = data.user.userId;
-  // tampilkan nama user di heading
-  document.getElementById('welcome-heading').textContent = `Selamat Datang, ${data.user.name}`;
-}
 
-    function renderList() {
-      txList.innerHTML = '';
-      transactions.forEach((tx, i) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${tx.title}</td>
-          <td>${tx.amount}</td>
-          <td>${tx.date || '-'}</td>
-          <td>
-            <button onclick="editTx(${i})">Edit</button>
-            <button onclick="deleteTx(${i})">Delete</button>
-          </td>
-        `;
-        txList.appendChild(tr);
+  setTodayDate();
+
+  async function checkAuth() {
+    const res = await fetch('/api/auth/me');
+    if (!res.ok) {
+      location.href = '/login.html';
+      return;
+    }
+    const data = await res.json();
+    currentUserId = data.user.userId;
+    document.getElementById('welcome-heading').textContent = `Selamat Datang, ${data.user.name}`;
+  }
+
+  async function fetchTransactions() {
+    const res = await fetch('/api/transactions');
+    const data = await res.json();
+    transactions = data;
+    renderList();
+  }
+
+  function renderList() {
+    txList.innerHTML = '';
+    transactions.forEach((tx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${tx.title}</td>
+        <td>${tx.amount}</td>
+        <td>${tx.date || '-'}</td>
+        <td>
+          <button onclick="editTx('${tx.id}')">Edit</button>
+          <button onclick="deleteTx('${tx.id}')">Delete</button>
+        </td>
+      `;
+      txList.appendChild(tr);
+    });
+  }
+
+  window.editTx = function(id) {
+    const tx = transactions.find(t => t.id === id);
+    if (!tx) return;
+    txIdInput.value = tx.id;
+    titleInput.value = tx.title;
+    amountInput.value = tx.amount;
+    dateInput.value = tx.date || '';
+    cancelEditBtn.style.display = 'inline-block';
+    form.querySelector('button[type="submit"]').textContent = 'Update';
+  };
+
+  window.deleteTx = async function(id) {
+    if (confirm('Hapus transaksi ini?')) {
+      await fetch(`/api/transactions?id=${id}`, { method: 'DELETE' });
+      fetchTransactions();
+      resetForm();
+    }
+  };
+
+  function resetForm() {
+    txIdInput.value = '';
+    titleInput.value = '';
+    amountInput.value = '';
+    setTodayDate();
+    cancelEditBtn.style.display = 'none';
+    form.querySelector('button[type="submit"]').textContent = 'Add';
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = titleInput.value.trim();
+    const amount = parseFloat(amountInput.value);
+    const date = dateInput.value;
+    if (!title || isNaN(amount)) return alert('Mohon isi Title dan Amount dengan benar.');
+
+    const id = txIdInput.value;
+    if (id) {
+      // Edit
+      await fetch('/api/transactions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, title, amount, date })
+      });
+    } else {
+      // Tambah
+      await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, amount, date })
       });
     }
+    fetchTransactions();
+    resetForm();
+  });
 
-    function editTx(i) {
-      const tx = transactions[i];
-      txIdInput.value = i;
-      titleInput.value = tx.title;
-      amountInput.value = tx.amount;
-      dateInput.value = tx.date || ''; // kalau kosong tetap kosong
-      editId = i;
-      cancelEditBtn.style.display = 'inline-block';
-      form.querySelector('button[type="submit"]').textContent = 'Update';
-    }
+  cancelEditBtn.addEventListener('click', resetForm);
 
-    function deleteTx(i) {
-      if (confirm('Hapus transaksi ini?')) {
-        transactions.splice(i, 1);
-        renderList();
-        resetForm();
-      }
-    }
+  logoutBtn.addEventListener('click', async () => {
+    await fetch('/api/auth/logout');
+    location.href = '/login.html';
+  });
 
-    function resetForm() {
-      txIdInput.value = '';
-      titleInput.value = '';
-      amountInput.value = '';
-      setTodayDate(); // reset tanggal ke hari ini setiap kali reset form
-      editId = null;
-      cancelEditBtn.style.display = 'none';
-      form.querySelector('button[type="submit"]').textContent = 'Add';
-    }
+  // Inisialisasi
+  checkAuth().then(fetchTransactions);
+</script>
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const title = titleInput.value.trim();
-      const amount = parseFloat(amountInput.value);
-      const date = dateInput.value;
-
-      if (!title || isNaN(amount)) return alert('Mohon isi Title dan Amount dengan benar.');
-
-      if (editId === null) {
-        // Add new
-        transactions.push({ title, amount, date });
-      } else {
-        // Update existing
-        transactions[editId] = { title, amount, date };
-      }
-      renderList();
-      resetForm();
-    });
-
-    cancelEditBtn.addEventListener('click', resetForm);
-
-    logoutBtn.addEventListener('click', () => {
-      alert('Logout clicked');
-      // Implement logout logic here
-    });
-
-    renderList();
-  </script>
 </body>
 
 </html>
