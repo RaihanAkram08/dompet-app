@@ -92,17 +92,17 @@
       background: linear-gradient(90deg, #2f5972, #1f4254);
     }
 
-    form#transaction-form button#cancel-edit {
+    /* form#transaction-form button#cancel-edit {
       background: #a94442;
       flex: 1 1 140px;
       margin-left: 0.5rem;
       display: none;
       box-shadow: 0 6px 18px #912d2d;
-    }
+    } */
 
-    form#transaction-form button#cancel-edit:hover {
+    /* form#transaction-form button#cancel-edit:hover {
       background: #7a302f;
-    }
+    } */
 
     table {
       width: 100%;
@@ -186,8 +186,9 @@
         flex-direction: column;
       }
 
-      form#transaction-form button[type="submit"],
-      form#transaction-form button#cancel-edit {
+      
+      /* form#transaction-form button#cancel-edit */
+      form#transaction-form button[type="submit"] {
         width: 100%;
         margin-left: 0;
       }
@@ -236,7 +237,7 @@
     <input type="number" id="amount" placeholder="Amount" required />
     <input type="date" id="date" />
     <button type="submit">Add</button>
-    <button type="button" id="cancel-edit">Cancel Edit</button>
+    <!-- <button type="button" id="cancel-edit">Cancel Edit</button> -->
   </form>
 
   <table border="0" cellspacing="0" cellpadding="0">
@@ -261,7 +262,7 @@
   const txIdInput = document.getElementById('tx-id');
   const titleInput = document.getElementById('title');
   const amountInput = document.getElementById('amount');
-  const cancelEditBtn = document.getElementById('cancel-edit');
+  // const cancelEditBtn = document.getElementById('cancel-edit');
   const txList = document.getElementById('transaction-list');
   const logoutBtn = document.getElementById('logout-btn');
 
@@ -305,7 +306,7 @@
         <td>${tx.amount}</td>
         <td>${tx.date || '-'}</td>
         <td>
-          <button onclick="editTx('${tx.id}')">Edit</button>
+          
           <button onclick="deleteTx('${tx.id}')">Delete</button>
         </td>
       `;
@@ -313,16 +314,16 @@
     });
   }
 
-  window.editTx = function(id) {
-    const tx = transactions.find(t => t.id === id);
-    if (!tx) return;
-    txIdInput.value = tx.id;
-    titleInput.value = tx.title;
-    amountInput.value = tx.amount;
-    dateInput.value = tx.date || '';
-    cancelEditBtn.style.display = 'inline-block';
-    form.querySelector('button[type="submit"]').textContent = 'Update';
-  };
+  // window.editTx = function(id) {
+  //   const tx = transactions.find(t => t.id === id);
+  //   if (!tx) return;
+  //   txIdInput.value = tx.id;
+  //   titleInput.value = tx.title;
+  //   amountInput.value = tx.amount;
+  //   dateInput.value = tx.date || '';
+  //   cancelEditBtn.style.display = 'inline-block';
+  //   form.querySelector('button[type="submit"]').textContent = 'Update';
+  // };
 
   window.deleteTx = async function(id) {
     if (confirm('Hapus transaksi ini?')) {
@@ -337,7 +338,7 @@
     titleInput.value = '';
     amountInput.value = '';
     setTodayDate();
-    cancelEditBtn.style.display = 'none';
+    // cancelEditBtn.style.display = 'none';
     form.querySelector('button[type="submit"]').textContent = 'Add';
   }
 
@@ -368,7 +369,7 @@
     resetForm();
   });
 
-  cancelEditBtn.addEventListener('click', resetForm);
+  // cancelEditBtn.addEventListener('click', resetForm);
 
   logoutBtn.addEventListener('click', async () => {
     await fetch('/api/auth/logout');
